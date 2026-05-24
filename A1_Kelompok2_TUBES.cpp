@@ -8,6 +8,7 @@
 #include <chrono>
 #include <windows.h>
 #include <ctime>
+#include <cmath>
 
 using namespace std;
 
@@ -79,6 +80,8 @@ private:
     vector<vector<Edge>> graph;
 
     vector<Party> parties;
+    vector<Team> validTeams;
+    
 
 public:
 
@@ -169,118 +172,10 @@ public:
     }
 
 
-    void matchmakingTerbaik(int start, int tujuan)
-    {
-        loading("Searching Best Matchmaking");
-        vector<double> dist(V, INF);
-
-        vector<int> parent(V, -1);
-
-        priority_queue<
-            pair<double,int>,
-            vector<pair<double,int>>,
-            greater<pair<double,int>>
-        > pq;
-
-        dist[start] = 0;
-
-        pq.push({0,start});
-
-        while(!pq.empty())
-        {
-            int u = pq.top().second;
-
-            pq.pop();
-
-            cout << "\nScanning "
-                << parties[u].id
-                << "...";
-
-            Sleep(700);
-
-            for(auto edge : graph[u])
-            {
-                int v = edge.to;
-
-                double w = 100 - edge.weight;
-
-                if(dist[u] + w < dist[v])
-                {
-                    dist[v] = dist[u] + w;
-
-                    parent[v] = u;
-
-                    pq.push({dist[v], v});
-                }
-            }
-        }
-
-        vector<int> path;
-
-        int current = tujuan;
-
-        while(current != -1)
-        {
-            path.push_back(current);
-
-            current = parent[current];
-        }
-
-        cout << "\n\n======= MATCHMAKING TERBAIK =======\n";
-
-        cout << "\nParty Awal : "
-             << parties[start].id;
-
-        cout << "\nTarget Party : "
-             << parties[tujuan].id;
-
-        cout << "\n\nRute Matchmaking:\n";
-
-        for(int i=path.size()-1; i>=0; i--)
-        {
-            cout << parties[path[i]].id;
-
-            if(i != 0)
-                cout << "\n -> ";
-        }
-
-        cout << "\n\nKoneksi matchmaking optimal ditemukan!\n";
-
-        double synergy = 0;
-
-        for(int i=0; i<path.size(); i++)
-        {
-            synergy += parties[path[i]].avgWR;
-        }
-
-        synergy /= path.size();
-
-        cout << "\n================================";
-
-        cout << "\nSTATISTIK TIM";
-
-        cout << "\n================================";
-
-        cout << "\nAverage Team WR : "
-            << fixed << setprecision(2)
-            << synergy
-            << "%";
-
-        if(synergy >= 90)
-            cout << "\nTeam Chemistry : PERFECT";
-
-        else if(synergy >= 80)
-            cout << "\nTeam Chemistry : HIGH";
-
-        else
-            cout << "\nTeam Chemistry : NORMAL";
-
-        cout << endl;
-    }
-
-
     void teamOptimal()
     {
+        loading("Membangun koneksi matchmaking optimal");
+
         vector<double> key(V, INF);
 
         vector<bool> mst(V, false);
@@ -289,6 +184,8 @@ public:
 
         key[0] = 0;
 
+        double totalCompatibility = 0;
+
         for(int count=0; count<V-1; count++)
         {
             int u = -1;
@@ -296,11 +193,17 @@ public:
             for(int i=0; i<V; i++)
             {
                 if(!mst[i] &&
-                   (u==-1 || key[i] < key[u]))
+                (u==-1 || key[i] < key[u]))
                 {
                     u = i;
                 }
             }
+
+            cout << "\nMenghubungkan "
+                << parties[u].id
+                << "...";
+
+            Sleep(500);
 
             mst[u] = true;
 
@@ -308,72 +211,279 @@ public:
             {
                 int v = edge.to;
 
-                double w = 100 - edge.weight;
+                // penalty cost
+                double penalty = 100 - edge.weight;
 
-                if(!mst[v] && w < key[v])
+                if(!mst[v] && penalty < key[v])
                 {
-                    key[v] = w;
+                    key[v] = penalty;
 
                     parent[v] = u;
                 }
             }
         }
 
-        cout << "\nTIM YANG OPTIMAL\n";
+        cout << "\n\n================================";
+        cout << "\n KONEKSI MATCHMAKING OPTIMAL";
+        cout << "\n================================\n";
 
         for(int i=1; i<V; i++)
         {
-            cout << parties[parent[i]].id
-                 << " <--> "
-                 << parties[i].id
-                 << " | Weight : "
-                 << fixed << setprecision(2)
-                 << 100 - key[i]
-                 << endl;
+            double compatibility =
+                100 - key[i];
+
+            double penalty =
+                key[i];
+
+            totalCompatibility += compatibility;
+
+            cout << "\n"
+                << parties[parent[i]].id
+                << " <--> "
+                << parties[i].id;
+
+            cout << "\nCompatibility : "
+                << fixed << setprecision(2)
+                << compatibility
+                << "%";
+
+            cout << "\nPenalty Cost : "
+                << penalty;
+
+            cout << "\n--------------------------------";
         }
-    }
 
-    void randomMatchmaking()
-    {
-        srand(time(0));
-
-        int a = rand() % V;
-        int b = rand() % V;
-
-        while(a == b)
-        {
-            b = rand() % V;
-        }
-
-        cout << "\nPENCARIAN YANG RANDOM\n";
-
-        cout << "\nParty 1 : "
-            << parties[a].id;
-
-        cout << "\nParty 2 : "
-            << parties[b].id;
-
-        cout << "\n\nMatch Found!\n";
-
-        double synergy =
-            (parties[a].avgWR +
-            parties[b].avgWR) / 2;
-
-        cout << "\nTeam Synergy : "
+        cout << "\n\nTOTAL GRAPH COMPATIBILITY : "
             << fixed << setprecision(2)
-            << synergy
-            << "%\n";
+            << totalCompatibility;
 
-        if(synergy >= 90)
-            cout << "Chemistry : PERFECT\n";
+        double avgCompatibility =
+            totalCompatibility / (V - 1);
 
-        else if(synergy >= 80)
-            cout << "Chemistry : HIGH\n";
+        cout << "\nAVERAGE COMPATIBILITY : "
+            << avgCompatibility
+            << "%";
+
+        if(avgCompatibility >= 95)
+            cout << "\nGRAPH CHEMISTRY : PERFECT\n";
+
+        else if(avgCompatibility >= 85)
+            cout << "\nGRAPH CHEMISTRY : HIGH\n";
 
         else
-            cout << "Chemistry : NORMAL\n";
+            cout << "\nGRAPH CHEMISTRY : NORMAL\n";
     }
-};
+
+
+    void dfsTeam(
+        int index,
+        vector<int>& current,
+        int totalPlayer,
+        double totalScore
+    )
+    {
+        
+        if(totalPlayer == 5)
+        {
+            Team t;
+
+            t.parties = current;
+
+            t.score = totalScore;
+
+            validTeams.push_back(t);
+
+            return;
+        }
+
+        
+        if(totalPlayer > 5 || index >= V)
+        {
+            return;
+        }
+
+        
+        current.push_back(index);
+
+        dfsTeam(
+            index + 1,
+            current,
+            totalPlayer + parties[index].size,
+            totalScore + parties[index].avgWR
+        );
+
+        current.pop_back();
+
+        
+        dfsTeam(
+            index + 1,
+            current,
+            totalPlayer,
+            totalScore
+        );
+    }
+
+
+    void matchmaking5v5()
+    {
+        loading("Membentuk balanced matchmaking 5 VS 5");
+
+        validTeams.clear();
+
+        vector<int> current;
+
+        dfsTeam(0, current, 0, 0);
+
+        if(validTeams.size() < 2)
+        {
+            cout << "\nTidak cukup team valid!\n";
+            return;
+        }
+
+        double bestDiff = INF;
+
+        Team bestA;
+        Team bestB;
+
+
+        for(int i=0; i<validTeams.size(); i++)
+        {
+            for(int j=i+1; j<validTeams.size(); j++)
+            {
+                bool overlap = false;
+
+                for(auto a : validTeams[i].parties)
+                {
+                    for(auto b : validTeams[j].parties)
+                    {
+                        if(a == b)
+                        {
+                            overlap = true;
+                        }
+                    }
+                }
+
+                if(overlap)
+                    continue;
+
+                double avgA =
+                    validTeams[i].score /
+                    validTeams[i].parties.size();
+
+                double avgB =
+                    validTeams[j].score /
+                    validTeams[j].parties.size();
+
+                double diff =
+                    fabs(avgA - avgB);
+
+                if(diff < bestDiff)
+                {
+                    bestDiff = diff;
+
+                    bestA = validTeams[i];
+
+                    bestB = validTeams[j];
+                }
+            }
+        }
+
+       
+
+        cout << "\n================================";
+        cout << "\n MATCHMAKING....................";
+        cout << "\n================================";
+
+
+        cout << "\n\nTEAM A\n";
+
+        int totalA = 0;
+
+        double wrA = 0;
+
+        for(auto idx : bestA.parties)
+        {
+            cout << "- "
+                << parties[idx].id
+                << " ("
+                << parties[idx].size
+                << " Player)\n";
+
+            totalA += parties[idx].size;
+
+            wrA += parties[idx].avgWR;
+        }
+
+        wrA /= bestA.parties.size();
+
+
+        cout << "\nTEAM B\n";
+
+        int totalB = 0;
+
+        double wrB = 0;
+
+        for(auto idx : bestB.parties)
+        {
+            cout << "- "
+                << parties[idx].id
+                << " ("
+                << parties[idx].size
+                << " Player)\n";
+
+            totalB += parties[idx].size;
+
+            wrB += parties[idx].avgWR;
+        }
+
+        wrB /= bestB.parties.size();
+
+
+        cout << "\n================================";
+
+        cout << "\nSTATISTIK MATCHMAKING";
+
+        cout << "\n================================";
+
+        cout << "\n\nTEAM A";
+
+        cout << "\nTotal Player : "
+            << totalA;
+
+        cout << "\nAverage WR : "
+            << fixed << setprecision(2)
+            << wrA
+            << "%";
+
+        cout << "\n\nTEAM B";
+
+        cout << "\nTotal Player : "
+            << totalB;
+
+        cout << "\nAverage WR : "
+            << fixed << setprecision(2)
+            << wrB
+            << "%";
+
+        cout << "\n\nWR Difference : "
+            << bestDiff
+            << "%";
+
+
+        cout << "\n\nMATCH BALANCE : ";
+
+        if(bestDiff <= 1)
+            cout << "PERFECT";
+
+        else if(bestDiff <= 3)
+            cout << "HIGH";
+
+        else
+            cout << "NORMAL";
+
+        cout << "\n\nMATCH FOUND!\n";
+    }
+    };
 
 
 int main()
@@ -479,10 +589,9 @@ int main()
 
         cout << "\n1. Tampilkan Graph";
         cout << "\n2. Detail Party";
-        cout << "\n3. Cari Matchmaking Terbaik";
-        cout << "\n4. Bentuk Team Optimal (Prim)";
-        cout << "\n5. Random Matchmaking";
-        cout << "\n6. Keluar";
+        cout << "\n3. Bentuk Team Optimal (Prim)";
+        cout << "\n4. Matchmaking 5 VS 5";
+        cout << "\n5. Keluar";
 
         cout << "\n\nPilihan : ";
         cin >> pilih;
@@ -501,39 +610,21 @@ int main()
 
             break;
 
-        case 3: {
+        
 
-            int awal, tujuan;
-
-            g.tampilParty();
-
-            cout << "\nPilih Party Awal : ";
-            cin >> awal;
-
-            cout << "Pilih Target Party : ";
-            cin >> tujuan;
-
-            g.matchmakingTerbaik(
-                awal,
-                tujuan
-            );
-
-            break;
-        }
-
-        case 4:
+        case 3:
 
             g.teamOptimal();
 
             break;
 
-        case 5:
+        case 4:
 
-            g.randomMatchmaking();
+            g.matchmaking5v5();
 
             break;
 
-        case 6:
+        case 5:
 
             cout << "\nProgram selesai...\n";
 
@@ -544,7 +635,7 @@ int main()
             cout << "\nPilihan tidak valid!\n";
         }
 
-    } while(pilih != 6);
+    } while(pilih != 5);
 
     return 0;
 }
