@@ -226,7 +226,7 @@ public:
             current = parent[current];
         }
 
-        cout << "\n======= MATCHMAKING TERBAIK =======\n";
+        cout << "\n\n======= MATCHMAKING TERBAIK =======\n";
 
         cout << "\nParty Awal : "
              << parties[start].id;
@@ -379,7 +379,7 @@ public:
 int main()
 {
     system("color 0D");
-    MatchmakingGraph g(10);
+    MatchmakingGraph g(12);
 
     Player P1 = {"P1", "Mythic 20", 58, {"Jung","EXP","Roam"}};
     Player P2 = {"P2", "Mythic 21", 57, {"EXP","Roam","Mid"}};
@@ -423,6 +423,8 @@ int main()
     Party S3 = {"S3","Solo",1,16,53,{"Gold","Mid","Roam"},{P16}};
     Party S4 = {"S4","Solo",1,21,57,{"Jung","EXP","Mid","Roam"},{P17}};
     Party S5 = {"S5","Solo",1,22,60,{"EXP","Gold","Mid","Roam"},{P18}};
+    Party S6 = {"S6","Solo",1,0,56,{"ALL ROLE"},{P19}};
+    Party S7 = {"S7","Solo",1,20,58,{"Jung","Gold","Mid"},{P20}};
 
     g.addParty(T1);
     g.addParty(D1);
@@ -434,34 +436,38 @@ int main()
     g.addParty(S3);
     g.addParty(S4);
     g.addParty(S5);
+    g.addParty(S6);
+    g.addParty(S7);
 
     g.addEdge(0,3,92.40);
     g.addEdge(0,5,95.00);
     g.addEdge(0,9,98.00);
     g.addEdge(0,6,99.50);
-
     g.addEdge(1,5,95.38);
     g.addEdge(1,9,99.63);
     g.addEdge(1,6,89.20);
-
     g.addEdge(3,4,95.10);
     g.addEdge(3,7,95.33);
     g.addEdge(3,9,91.58);
     g.addEdge(3,6,92.98);
-
     g.addEdge(4,2,88.38);
     g.addEdge(4,7,95.88);
     g.addEdge(4,8,79.63);
     g.addEdge(4,6,89.13);
-
     g.addEdge(6,5,93.58);
     g.addEdge(6,8,91.85);
     g.addEdge(6,9,89.18);
-
     g.addEdge(8,9,98.25);
     g.addEdge(8,7,83.75);
-
     g.addEdge(2,7,94.00);
+    g.addEdge(4,10,79.63); 
+    g.addEdge(4,11,89.13); 
+    g.addEdge(6,10,81.58);
+    g.addEdge(7,10,82.25); 
+    g.addEdge(8,10,83.75); 
+    g.addEdge(9,10,82.00); 
+    g.addEdge(0,11,99.50); 
+    g.addEdge(3,11,92.98); 
 
     int pilih;
 
