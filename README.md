@@ -34,9 +34,11 @@ Program digunakan untuk mensimulasikan:
 
 | Nama | NIM |
 |---|---|
-| Nama Anggota 1 | 22xxxxxxxx |
-| Nama Anggota 2 | 22xxxxxxxx |
-| Nama Anggota 3 | 22xxxxxxxx |
+| Farel Yamotaro Hia| 251402069 |
+| Rodotua Naomi M. Simamora| 251402030 |
+| Dian Indriani | 251402040 |
+| Yazri Khoiri Matondang| 251402016 |
+| Chynthia Rachel A. Hutabarat| 251402022 |
 
 ---
 
@@ -455,5 +457,5 @@ Chemistry : PERFECT
 # 📌 Repository
 
 ```text
-https://github.com/username/mobile-legends-matchmaking
+https://github.com/username/mobile-legends-matchmaking](https://github.com/F-comand02/Kelompok2-A1-TUBESSDA
 ```
